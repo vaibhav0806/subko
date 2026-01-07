@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subko Icon Generator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    h1 { margin-bottom: 10px; color: #10B981; }
+    p { color: #888; margin-bottom: 40px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 40px;
+    }
+    .card {
+      background: #252525;
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .card h3 { margin-bottom: 8px; }
+    .card .size { color: #666; font-size: 14px; margin-bottom: 16px; }
+    .preview {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 16px;
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    canvas { border-radius: 12px; }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #10B981;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: #059669; }
+    .instructions {
+      margin-top: 40px;
+      padding: 24px;
+      background: #252525;
+      border-radius: 16px;
+    }
+    .instructions h3 { margin-bottom: 16px; }
+    .instructions ol { padding-left: 20px; }
+    .instructions li { margin-bottom: 8px; color: #aaa; }
+    .instructions code {
+      background: #1a1a1a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Subko Icon Generator</h1>
+  <p>Generate and download app icons for the Subko app</p>
+
+  <div class="grid">
+    <!-- Main App Icon -->
+    <div class="card">
+      <h3>App Icon</h3>
+      <div class="size">1024 x 1024 px</div>
+      <div class="preview">
+        <canvas id="iconCanvas" width="1024" height="1024"></canvas>
+      </div>
+      <button onclick="download('iconCanvas', 'icon.png')">Download icon.png</button>
+    </div>
+
+    <!-- Adaptive Icon Foreground -->
+    <div class="card">
+      <h3>Adaptive Icon (Android)</h3>
+      <div class="size">1024 x 1024 px (foreground layer)</div>
+      <div class="preview">
+        <canvas id="adaptiveCanvas" width="1024" height="1024"></canvas>
+      </div>
+      <button onclick="download('adaptiveCanvas', 'adaptive-icon.png')">Download adaptive-icon.png</button>
+    </div>
+
+    <!-- Splash Icon -->
+    <div class="card">
+      <h3>Splash Screen Icon</h3>
+      <div class="size">512 x 512 px</div>
+      <div class="preview">
+        <canvas id="splashCanvas" width="512" height="512"></canvas>
+      </div>
+      <button onclick="download('splashCanvas', 'splash-icon.png')">Download splash-icon.png</button>
+    </div>
+
+    <!-- Favicon -->
+    <div class="card">
+      <h3>Favicon</h3>
+      <div class="size">48 x 48 px</div>
+      <div class="preview">
+        <canvas id="faviconCanvas" width="48" height="48"></canvas>
+      </div>
+      <button onclick="download('faviconCanvas', 'favicon.png')">Download favicon.png</button>
+    </div>
+  </div>
+
+  <div class="instructions">
+    <h3>Instructions</h3>
+    <ol>
+      <li>Click each download button to save the PNG files</li>
+      <li>Move the downloaded files to <code>assets/images/</code> folder, replacing existing files</li>
+      <li>Rebuild your app with <code>eas build</code></li>
+    </ol>
+  </div>
+
+  <script>
+    const PRIMARY = '#10B981';
+    const PRIMARY_DARK = '#059669';
+    const BG_DARK = '#0F0F0F';
+
+    // Draw the "S" logo
+    function drawLogo(ctx, size, withBackground = true, isAdaptive = false) {
+      const center = size / 2;
+
+      if (withBackground) {
+        // Background with gradient
+        const gradient = ctx.createLinearGradient(0, 0, size, size);
+        gradient.addColorStop(0, PRIMARY);
+        gradient.addColorStop(1, PRIMARY_DARK);
+
+        if (isAdaptive) {
+          // Adaptive icon - fill entire canvas (will be masked by Android)
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, size, size);
+        } else {
+          // Regular icon - rounded corners
+          const radius = size * 0.22;
+          ctx.beginPath();
+          ctx.roundRect(0, 0, size, size, radius);
+          ctx.fillStyle = gradient;
+          ctx.fill();
+        }
+      }
+
+      // Draw stylized "S"
+      const logoSize = isAdaptive ? size * 0.35 : size * 0.5;
+      const offsetY = isAdaptive ? 0 : 0;
+
+      ctx.save();
+      ctx.translate(center, center + offsetY);
+
+      // S shape using bezier curves
+      ctx.beginPath();
+      const s = logoSize;
+
+      // Top curve of S
+      ctx.moveTo(s * 0.3, -s * 0.45);
+      ctx.bezierCurveTo(
+        s * 0.3, -s * 0.6,
+        -s * 0.1, -s * 0.6,
+        -s * 0.25, -s * 0.45
+      );
+      ctx.bezierCurveTo(
+        -s * 0.4, -s * 0.3,
+        -s * 0.35, -s * 0.1,
+        0, 0
+      );
+
+      // Bottom curve of S
+      ctx.bezierCurveTo(
+        s * 0.35, s * 0.1,
+        s * 0.4, s * 0.3,
+        s * 0.25, s * 0.45
+      );
+      ctx.bezierCurveTo(
+        s * 0.1, s * 0.6,
+        -s * 0.3, s * 0.6,
+        -s * 0.3, s * 0.45
+      );
+
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = s * 0.18;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // Add a subtle inner glow/highlight
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = s * 0.08;
+      ctx.stroke();
+
+      ctx.restore();
+
+      // Add "SUBKO" text for main icon (not adaptive)
+      if (withBackground && !isAdaptive && size >= 512) {
+        ctx.font = `bold ${size * 0.08}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.letterSpacing = `${size * 0.02}px`;
+        // ctx.fillText('SUBKO', center, center + size * 0.35);
+      }
+    }
+
+    // Draw splash screen logo (white on transparent)
+    function drawSplashLogo(ctx, size) {
+      ctx.clearRect(0, 0, size, size);
+
+      const center = size / 2;
+      const logoSize = size * 0.6;
+
+      ctx.save();
+      ctx.translate(center, center);
+
+      // S shape
+      ctx.beginPath();
+      const s = logoSize;
+
+      ctx.moveTo(s * 0.3, -s * 0.45);
+      ctx.bezierCurveTo(s * 0.3, -s * 0.6, -s * 0.1, -s * 0.6, -s * 0.25, -s * 0.45);
+      ctx.bezierCurveTo(-s * 0.4, -s * 0.3, -s * 0.35, -s * 0.1, 0, 0);
+      ctx.bezierCurveTo(s * 0.35, s * 0.1, s * 0.4, s * 0.3, s * 0.25, s * 0.45);
+      ctx.bezierCurveTo(s * 0.1, s * 0.6, -s * 0.3, s * 0.6, -s * 0.3, s * 0.45);
+
+      // Gradient stroke
+      const gradient = ctx.createLinearGradient(-s/2, -s/2, s/2, s/2);
+      gradient.addColorStop(0, PRIMARY);
+      gradient.addColorStop(1, PRIMARY_DARK);
+
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = s * 0.18;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // Generate all icons
+    function generateIcons() {
+      // Main icon (1024x1024)
+      const iconCtx = document.getElementById('iconCanvas').getContext('2d');
+      drawLogo(iconCtx, 1024, true, false);
+
+      // Adaptive icon (1024x1024)
+      const adaptiveCtx = document.getElementById('adaptiveCanvas').getContext('2d');
+      drawLogo(adaptiveCtx, 1024, true, true);
+
+      // Splash icon (512x512)
+      const splashCtx = document.getElementById('splashCanvas').getContext('2d');
+      drawSplashLogo(splashCtx, 512);
+
+      // Favicon (48x48)
+      const faviconCtx = document.getElementById('faviconCanvas').getContext('2d');
+      drawLogo(faviconCtx, 48, true, false);
+    }
+
+    // Download canvas as PNG
+    function download(canvasId, filename) {
+      const canvas = document.getElementById(canvasId);
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // Scale canvas for display
+    function scaleCanvasForDisplay() {
+      document.querySelectorAll('canvas').forEach(canvas => {
+        const maxDisplay = 200;
+        const scale = Math.min(maxDisplay / canvas.width, 1);
+        canvas.style.width = `${canvas.width * scale}px`;
+        canvas.style.height = `${canvas.height * scale}px`;
+      });
+    }
+
+    // Initialize
+    generateIcons();
+    scaleCanvasForDisplay();
+  </script>
+</body>
+</html>
