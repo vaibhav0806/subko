@@ -242,13 +242,13 @@ export default function DashboardScreen() {
                     <View
                       style={[
                         styles.avatar,
-                        { backgroundColor: CategoryColors[subscription.category] + '20' },
+                        { backgroundColor: (CategoryColors[subscription.category] || SubkoColors.primary[500]) + '20' },
                       ]}
                     >
                       <Text
                         style={[
                           styles.avatarText,
-                          { color: CategoryColors[subscription.category] },
+                          { color: CategoryColors[subscription.category] || SubkoColors.primary[500] },
                         ]}
                       >
                         {getInitials(subscription.merchantName)}
@@ -369,13 +369,13 @@ export default function DashboardScreen() {
                     <View
                       style={[
                         styles.avatar,
-                        { backgroundColor: CategoryColors[subscription.category] + '20' },
+                        { backgroundColor: (CategoryColors[subscription.category] || SubkoColors.primary[500]) + '20' },
                       ]}
                     >
                       <Text
                         style={[
                           styles.avatarText,
-                          { color: CategoryColors[subscription.category] },
+                          { color: CategoryColors[subscription.category] || SubkoColors.primary[500] },
                         ]}
                       >
                         {getInitials(subscription.merchantName)}

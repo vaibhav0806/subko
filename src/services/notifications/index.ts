@@ -97,8 +97,18 @@ export async function scheduleSubscriptionReminder(
 
   // Calculate trigger date (nextDebitDate - reminderDaysBefore)
   const nextDebitDate = new Date(subscription.nextDebitDate);
+
+  // Validate date is valid
+  if (isNaN(nextDebitDate.getTime())) {
+    console.log('Invalid nextDebitDate:', subscription.nextDebitDate);
+    return null;
+  }
+
+  // Validate reminderDaysBefore is positive
+  const daysBefore = Math.max(0, subscription.reminderDaysBefore || 1);
+
   const triggerDate = new Date(nextDebitDate);
-  triggerDate.setDate(triggerDate.getDate() - subscription.reminderDaysBefore);
+  triggerDate.setDate(triggerDate.getDate() - daysBefore);
   triggerDate.setHours(9, 0, 0, 0); // 9:00 AM
 
   // Don't schedule if trigger date is in the past

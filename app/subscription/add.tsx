@@ -53,20 +53,20 @@ import {
 } from '@/constants/Theme';
 import type { SubscriptionCategory, SubscriptionFrequency } from '@/src/types';
 
-const CATEGORY_ICONS: Record<SubscriptionCategory, React.ReactNode> = {
-  ott: <Tv size={18} />,
-  music: <Music size={18} />,
-  utilities: <Zap size={18} />,
-  insurance: <Shield size={18} />,
-  emi: <Wallet size={18} />,
-  investment: <TrendingUp size={18} />,
-  telecom: <Phone size={18} />,
-  education: <GraduationCap size={18} />,
-  fitness: <Dumbbell size={18} />,
-  cloud: <Cloud size={18} />,
-  gaming: <Gamepad2 size={18} />,
-  news: <Newspaper size={18} />,
-  other: <MoreHorizontal size={18} />,
+const CATEGORY_ICONS: Record<SubscriptionCategory, (props: { size: number; color: string }) => React.ReactNode> = {
+  ott: (props) => <Tv {...props} />,
+  music: (props) => <Music {...props} />,
+  utilities: (props) => <Zap {...props} />,
+  insurance: (props) => <Shield {...props} />,
+  emi: (props) => <Wallet {...props} />,
+  investment: (props) => <TrendingUp {...props} />,
+  telecom: (props) => <Phone {...props} />,
+  education: (props) => <GraduationCap {...props} />,
+  fitness: (props) => <Dumbbell {...props} />,
+  cloud: (props) => <Cloud {...props} />,
+  gaming: (props) => <Gamepad2 {...props} />,
+  news: (props) => <Newspaper {...props} />,
+  other: (props) => <MoreHorizontal {...props} />,
 };
 
 const CATEGORIES: { value: SubscriptionCategory; label: string }[] = [
@@ -96,11 +96,14 @@ const FREQUENCIES: { value: SubscriptionFrequency; label: string; short: string 
 const REMINDER_DAYS = [1, 2, 3, 5, 7];
 
 const schema = z.object({
-  merchantName: z.string().min(1, 'Name is required'),
-  amount: z.string().min(1, 'Amount is required'),
+  merchantName: z.string().min(1, 'Name is required').max(100, 'Name too long'),
+  amount: z.string()
+    .min(1, 'Amount is required')
+    .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, 'Must be a positive number')
+    .refine((val) => parseFloat(val) <= 10000000, 'Amount too large'),
   category: z.string().min(1, 'Category is required'),
   frequency: z.string().min(1, 'Frequency is required'),
-  notes: z.string().optional(),
+  notes: z.string().max(500, 'Notes too long').optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -217,10 +220,7 @@ export default function AddSubscriptionScreen() {
               style={styles.previewCard}
             >
               <View style={styles.previewIcon}>
-                {React.cloneElement(CATEGORY_ICONS[watchedCategory] as React.ReactElement, {
-                  color: '#fff',
-                  size: 24,
-                })}
+                {CATEGORY_ICONS[watchedCategory]({ color: '#fff', size: 24 })}
               </View>
               <Text style={styles.previewAmount}>
                 {watchedAmount ? formatCurrency(watchedAmount) : '₹0'}
@@ -368,10 +368,10 @@ export default function AddSubscriptionScreen() {
                               { backgroundColor: isSelected ? catColor + '30' : 'transparent' },
                             ]}
                           >
-                            {React.cloneElement(
-                              CATEGORY_ICONS[cat.value] as React.ReactElement,
-                              { color: isSelected ? catColor : colors.textMuted }
-                            )}
+                            {CATEGORY_ICONS[cat.value]({
+                              size: 18,
+                              color: isSelected ? catColor : colors.textMuted,
+                            })}
                           </View>
                           <Text
                             style={[
